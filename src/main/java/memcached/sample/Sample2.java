@@ -15,7 +15,7 @@ public class Sample2 {
 		transcoder.setCompressionThreshold(1024);
 		
 		MemcachedClientFactoryBean factory = new MemcachedClientFactoryBean();
-		factory.setServers("192.168.33.11:11211");
+		factory.setServers("192.168.33.11:11211,192.168.33.11:11212");
 		factory.setProtocol(Protocol.BINARY);
 		factory.setTranscoder(transcoder);
 		factory.setOpTimeout(1000);
@@ -27,7 +27,7 @@ public class Sample2 {
 		factory.setMaxReconnectDelay(1000);
 		factory.afterPropertiesSet();
 		
-		MemcachedClient c;
+		MemcachedClient c = (MemcachedClient) factory.getObject();
 		
 		TestModel testModel = new TestModel();
 		testModel.setParam1("aaa");
@@ -35,11 +35,12 @@ public class Sample2 {
 		
 		try{
 			while(true){
-				c = (MemcachedClient) factory.getObject();
-				c.set("testModel", 3600, testModel);
-				TestModel myObject = (TestModel) c.get("testModel");
-				System.out.println(myObject);
-				Thread.sleep(1000);
+				try{
+					c.set("testModel", 3600, testModel);
+					TestModel myObject = (TestModel) c.get("testModel");
+					System.out.println(myObject);
+					Thread.sleep(1000);
+				}catch(Exception e){}
 			}
 		}finally{
 			factory.destroy();
